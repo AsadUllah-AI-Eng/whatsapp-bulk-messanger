@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bulk Messenger</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+            height: 95vh;
+            position: relative;
+            overflow: hidden;
+            margin-right: 20px;
+            transition: margin-right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container.sidebar-open {
+            margin-right: 350px;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #25D366, #128C7E);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #25D366;
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+
+        .target-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .target-input:focus {
+            outline: none;
+            border-color: #25D366;
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+
+        .form-hint {
+            display: block;
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            padding: 20px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-upload-area:hover {
+            border-color: #25D366;
+            background-color: rgba(37, 211, 102, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #25D366;
+            background-color: rgba(37, 211, 102, 0.1);
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+            color: #25D366;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .file-upload-hint {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .selected-file {
+            background: #f8f9fa;
+            border: 2px solid #25D366;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .selected-file.show {
+            display: block;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-icon {
+            color: #25D366;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .remove-file {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+        }
+
+        .btn-stop:hover {
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa726, #ff9800);
+            margin-top: 10px;
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 10px 20px rgba(255, 167, 38, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            margin-top: 10px;
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .progress-container {
+            margin-top: 15px;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .progress-stats {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: #e1e5e9;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #25D366, #128C7E);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .current-contact {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .status-messages {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .status-message {
+            padding: 5px 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .status-message:last-child {
+            border-bottom: none;
+        }
+
+        .status-message.success {
+            color: #25D366;
+        }
+
+        .status-message.error {
+            color: #ff4757;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tracking-section {
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tracking-section h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tracking-section h4 i {
+            margin-right: 8px;
+            color: #25D366;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            background: #ff3742;
+            transform: scale(1.05);
+        }
+
+        .delete-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tracking-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tracking-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            border-left: 3px solid #25D366;
+        }
+
+        .tracking-item.no-whatsapp {
+            border-left-color: #ff4757;
+            background: #fff5f5;
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 5px;
+                height: 98vh;
+            }
+
+            .container.sidebar-open {
+                margin-right: 10px;
+            }
+
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .file-upload-area {
+                padding: 15px 10px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .message-input {
+                min-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+        <div class="container">
+        <div class="header">
+            <h1><i class="fab fa-whatsapp"></i> WhatsApp Bulk Messenger</h1>
+            <p>Send personalized messages to multiple contacts from your Excel file</p>
+        </div>
+
+        <!-- Sidebar for tracking -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-chart-bar"></i> Campaign Tracking</h3>
+                <button class="close-sidebar" id="closeSidebar">&times;</button>
+            </div>
+            
+            <div class="tracking-section">
+                <div class="tracking-header">
+                    <h4><i class="fas fa-check-circle"></i> Sent Numbers</h4>
+                    <button class="delete-btn" id="deleteSentBtn" title="Delete all sent numbers">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="tracking-list" id="sentNumbersList">
+                    <p class="no-data">No numbers sent yet</p>
+                </div>
+            </div>
+            
+            <div class="tracking-section">
+                <div class="tracking-header">
+                    <h4><i class="fas fa-ban"></i> Invalid Numbers</h4>
+                    <button class="delete-btn" id="deleteInvalidBtn" title="Delete all invalid numbers">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="tracking-list" id="invalidNumbersList">
+                    <p class="no-data">No invalid numbers yet</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-chart-bar"></i>
+        </button>
+
+        <div class="alert alert-success" id="successAlert">
+            <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
+        </div>
+
+        <div class="alert alert-error" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
+        </div>
+
+        <div class="form-content">
+            <form id="messageForm">
+                <div class="form-group">
+                    <label for="message">
+                        <i class="fas fa-comment-dots"></i> Your Custom Message
+                    </label>
+                    <textarea 
+                        id="message" 
+                        class="message-input" 
+                        placeholder="Write your custom message here. Use {name} to personalize with serial numbers (SR#1, SR#2, etc.)..."
+                        required
+                    >Hello {name}, this is a personalized message from our team!</textarea>
+                    <small class="form-hint">Use {name} in your message - it will be replaced with SR#1, SR#2, etc. based on the serial number from your Excel file.</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="targetLimit">
+                            <i class="fas fa-target"></i> Target Limit (Optional)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="targetLimit" 
+                            class="target-input" 
+                            placeholder="Enter number of contacts to target (leave empty for all)"
+                            min="1"
+                        >
+                        <small class="form-hint">Leave empty to send to all contacts.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="messageDelay">
+                            <i class="fas fa-clock"></i> Message Delay (Seconds)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="messageDelay" 
+                            class="target-input" 
+                            placeholder="Enter delay between messages in seconds"
+                            min="1"
+                            max="300"
+                            value="5"
+                        >
+                        <small class="form-hint">Time to wait between sending each message (1-300 seconds).</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-file-excel"></i> Upload Excel File
+                    </label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-text">Click to upload or drag & drop</div>
+                        <div class="file-upload-hint">Excel files (.xlsx, .xls) with 'sr.no' and 'phone' columns</div>
+                    </div>
+                    <div class="selected-file" id="selectedFile">
+                        <div class="file-info">
+                            <div class="file-details">
+                                <i class="fas fa-file-excel file-icon"></i>
+                                <span id="fileName"></span>
+                            </div>
+                            <button type="button" class="remove-file" id="removeFile">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i> Send Messages
+                </button>
+
+                <button type="button" class="btn btn-stop" id="stopBtn" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Sending
+                </button>
+
+                <button type="button" class="btn btn-warning" id="pauseBtn" style="display: none;">
+                    <i class="fas fa-pause"></i> Pause Sending
+                </button>
+
+                <button type="button" class="btn btn-success" id="resumeBtn" style="display: none;">
+                    <i class="fas fa-play"></i> Resume Sending
+                </button>
+
+                <button type="button" class="btn btn-warning" id="closeBrowserBtn" style="display: none;">
+                    <i class="fas fa-window-close"></i> Close Browser
+                </button>
+
+                <button type="button" class="btn btn-warning" id="restartBrowserBtn" style="display: none;">
+                    <i class="fas fa-redo"></i> Restart Browser
+                </button>
+            </form>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-header">
+                <div class="progress-title">Sending Messages...</div>
+                <div class="progress-stats" id="progressStats">0 / 0</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="current-contact" id="currentContact">Preparing...</div>
+            <div class="status-messages" id="statusMessages"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let isSending = false;
+        let statusInterval = null;
+        let sentNumbersInterval = null;
+        let invalidNumbersInterval = null;
+        let sidebarOpen = false;
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFileDiv = document.getElementById('selectedFile');
+        const fileName = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileUploadArea.addEventListener('dragover', handleDragOver);
+        fileUploadArea.addEventListener('dragleave', handleDragLeave);
+        fileUploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        removeFileBtn.addEventListener('click', removeFile);
+
+        // Sidebar handling
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const deleteSentBtn = document.getElementById('deleteSentBtn');
+        const deleteInvalidBtn = document.getElementById('deleteInvalidBtn');
+        const container = document.querySelector('.container');
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        deleteSentBtn.addEventListener('click', deleteSentNumbers);
+        deleteInvalidBtn.addEventListener('click', deleteInvalidNumbers);
+
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            if (sidebarOpen) {
+                sidebar.classList.add('open');
+                container.classList.add('sidebar-open');
+            } else {
+                sidebar.classList.remove('open');
+                container.classList.remove('sidebar-open');
+            }
+        }
+
+        function closeSidebarFunc() {
+            sidebarOpen = false;
+            sidebar.classList.remove('open');
+            container.classList.remove('sidebar-open');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                showAlert('error', 'Please select an Excel file (.xlsx or .xls)');
+                return;
+            }
+            
+            selectedFile = file;
+            fileName.textContent = file.name;
+            selectedFileDiv.classList.add('show');
+            showAlert('success', 'File uploaded successfully!');
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            selectedFileDiv.classList.remove('show');
+        }
+
+        // Form submission
+        const form = document.getElementById('messageForm');
+        const sendBtn = document.getElementById('sendBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const closeBrowserBtn = document.getElementById('closeBrowserBtn');
+        const restartBrowserBtn = document.getElementById('restartBrowserBtn');
+        const progressContainer = document.getElementById('progressContainer');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedFile) {
+                showAlert('error', 'Please select an Excel file first');
+                return;
+            }
+
+            const message = document.getElementById('message').value.trim();
+            if (!message) {
+                showAlert('error', 'Please enter a message');
+                return;
+            }
+
+            const targetLimit = document.getElementById('targetLimit').value;
+            const limit = targetLimit ? parseInt(targetLimit) : 0;
+            
+            const messageDelay = document.getElementById('messageDelay').value;
+            const delay = messageDelay ? Math.max(1, Math.min(300, parseInt(messageDelay))) : 5;
+
+            await startSending(message, limit, delay);
+        });
+
+        stopBtn.addEventListener('click', async () => {
+            await stopSending();
+        });
+
+        closeBrowserBtn.addEventListener('click', async () => {
+            await closeBrowser();
+        });
+
+        restartBrowserBtn.addEventListener('click', async () => {
+            await restartBrowser();
+        });
+
+        pauseBtn.addEventListener('click', async () => {
+            await pauseSending();
+        });
+
+        resumeBtn.addEventListener('click', async () => {
+            await resumeSending();
+        });
+
+        async function startSending(message, targetLimit, messageDelay) {
+            try {
+                // Upload file first
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const uploadResponse = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const uploadResult = await uploadResponse.json();
+                if (!uploadResult.success) {
+                    showAlert('error', uploadResult.message);
+                    return;
+                }
+
+                // Start sending messages
+                const sendResponse = await fetch('/send_messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        filename: uploadResult.filename,
+                        target_limit: targetLimit,
+                        message_delay: messageDelay
+                    })
+                });
+
+                const sendResult = await sendResponse.json();
+                if (!sendResult.success) {
+                    showAlert('error', sendResult.message);
+                    return;
+                }
+
+                // Start progress tracking
+                isSending = true;
+                sendBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                pauseBtn.style.display = 'block';
+                resumeBtn.style.display = 'none';
+                closeBrowserBtn.style.display = 'block';
+                restartBrowserBtn.style.display = 'block';
+                progressContainer.classList.add('show');
+                
+                statusInterval = setInterval(updateStatus, 2000); // Update every 2 seconds for better real-time updates
+                sentNumbersInterval = setInterval(loadSentNumbers, 3000); // Update sent numbers every 3 seconds
+                invalidNumbersInterval = setInterval(loadInvalidNumbers, 3000); // Update invalid numbers every 3 seconds
+                showAlert('success', 'Message sending started!');
+
+            } catch (error) {
+                showAlert('error', 'An error occurred: ' + error.message);
+            }
+        }
+
+        async function stopSending() {
+            try {
+                await fetch('/stop_sending', { method: 'POST' });
+                isSending = false;
+                clearInterval(statusInterval);
+                clearInterval(sentNumbersInterval);
+                clearInterval(invalidNumbersInterval);
+                sendBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = 'none';
+                closeBrowserBtn.style.display = 'none';
+                restartBrowserBtn.style.display = 'none';
+                showAlert('success', 'Stopping message sending...');
+            } catch (error) {
+                showAlert('error', 'Error stopping: ' + error.message);
+            }
+        }
+
+        async function closeBrowser() {
+            try {
+                const response = await fetch('/close_browser', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('success', 'Browser closed successfully');
+                    closeBrowserBtn.style.display = 'none';
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error closing browser: ' + error.message);
+            }
+        }
+
+        async function restartBrowser() {
+            try {
+                restartBrowserBtn.disabled = true;
+                restartBrowserBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restarting...';
+                
+                const response = await fetch('/restart_browser', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', 'Browser session restarted successfully');
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error restarting browser: ' + error.message);
+            } finally {
+                restartBrowserBtn.disabled = false;
+                restartBrowserBtn.innerHTML = '<i class="fas fa-redo"></i> Restart Browser';
+            }
+        }
+
+        async function pauseSending() {
+            try {
+                const response = await fetch('/pause_sending', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('success', result.message);
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'block';
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error pausing: ' + error.message);
+            }
+        }
+
+        async function resumeSending() {
+            try {
+                const response = await fetch('/resume_sending', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('success', result.message);
+                    resumeBtn.style.display = 'none';
+                    pauseBtn.style.display = 'block';
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error resuming: ' + error.message);
+            }
+        }
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/status');
+                const status = await response.json();
+                
+                if (!status.is_sending && isSending) {
+                    // Sending completed
+                    isSending = false;
+                    clearInterval(statusInterval);
+                    clearInterval(sentNumbersInterval);
+                    clearInterval(invalidNumbersInterval);
+                    sendBtn.style.display = 'block';
+                    stopBtn.style.display = 'none';
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'none';
+                    closeBrowserBtn.style.display = 'none';
+                    restartBrowserBtn.style.display = 'none';
+                    
+                    if (status.failed_count === 0) {
+                        showAlert('success', `All ${status.sent_count} messages sent successfully!`);
+                    } else {
+                        showAlert('error', `Sent ${status.sent_count} messages, ${status.failed_count} failed.`);
+                    }
+                }
+
+                // Update pause/resume button states
+                if (status.is_sending) {
+                    if (status.is_paused) {
+                        pauseBtn.style.display = 'none';
+                        resumeBtn.style.display = 'block';
+                    } else {
+                        pauseBtn.style.display = 'block';
+                        resumeBtn.style.display = 'none';
+                    }
+                }
+
+                // Update progress
+                const progressStats = document.getElementById('progressStats');
+                const progressFill = document.getElementById('progressFill');
+                const currentContact = document.getElementById('currentContact');
+                const statusMessages = document.getElementById('statusMessages');
+
+                const processed_count = status.sent_count + status.failed_count + status.no_whatsapp_count;
+                progressStats.textContent = `${processed_count} / ${status.total_contacts} (Sent: ${status.sent_count}, Failed: ${status.failed_count}, Invalid: ${status.no_whatsapp_count})`;
+                
+                if (status.total_contacts > 0) {
+                    const progress = (processed_count / status.total_contacts) * 100;
+                    progressFill.style.width = progress + '%';
+                }
+
+                currentContact.textContent = status.current_contact || 'Preparing...';
+
+                // Update status messages
+                statusMessages.innerHTML = '';
+                
+                // Show recent errors (last 10)
+                const recentErrors = status.errors.slice(-10);
+                recentErrors.forEach(error => {
+                    const div = document.createElement('div');
+                    if (error.includes('[NO WHATSAPP]')) {
+                        div.className = 'status-message error';
+                        div.innerHTML = `<span style="color: #ff4757;">${error}</span>`;
+                    } else {
+                        div.className = 'status-message error';
+                        div.textContent = error;
+                    }
+                    statusMessages.appendChild(div);
+                });
+
+                // Update sidebar with no WhatsApp numbers from current session (for real-time display)
+                updateNoWhatsappList(status.no_whatsapp_numbers || []);
+                
+                // Update sent numbers list periodically
+                if (status.sent_count > 0) {
+                    loadSentNumbers();
+                }
+                
+                // Update invalid numbers list periodically (real-time from database)
+                if (status.no_whatsapp_count > 0) {
+                    loadInvalidNumbers();
+                }
+                
+                // Also update both lists every few seconds during sending for real-time updates
+                if (status.is_sending) {
+                    loadSentNumbers();
+                    loadInvalidNumbers();
+                }
+
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
+            const messageSpan = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            
+            messageSpan.textContent = message;
+            alertDiv.classList.add('show');
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        function updateNoWhatsappList(numbers) {
+            const listContainer = document.getElementById('noWhatsappList');
+            if (numbers.length === 0) {
+                listContainer.innerHTML = '<p class="no-data">No invalid numbers in current session</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            numbers.forEach(number => {
+                const div = document.createElement('div');
+                div.className = 'tracking-item no-whatsapp';
+                div.innerHTML = `
+                    <strong>${number}</strong><br>
+                    <small style="color: #ff4757;">Current Session</small>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        async function loadSentNumbers() {
+            try {
+                const response = await fetch('/get_sent_numbers');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const listContainer = document.getElementById('sentNumbersList');
+                    if (result.numbers.length === 0) {
+                        listContainer.innerHTML = '<p class="no-data">No numbers sent yet</p>';
+                        deleteSentBtn.disabled = true;
+                        return;
+                    }
+
+                    deleteSentBtn.disabled = false;
+                    listContainer.innerHTML = '';
+                    
+                    // Show total count
+                    const countDiv = document.createElement('div');
+                    countDiv.className = 'tracking-item';
+                    countDiv.style.background = '#f0f8f0';
+                    countDiv.style.borderLeft = '3px solid #25D366';
+                    countDiv.innerHTML = `<strong>Total Sent Numbers: ${result.numbers.length}</strong>`;
+                    listContainer.appendChild(countDiv);
+                    
+                    // Show recent sent numbers (last 20)
+                    const recentNumbers = result.numbers.slice(0, 20);
+                    recentNumbers.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'tracking-item';
+                        div.innerHTML = `
+                            <strong>${item.name}</strong><br>
+                            <small>${item.phone}</small><br>
+                            <small style="color: #666;">${new Date(item.date).toLocaleString()}</small>
+                        `;
+                        listContainer.appendChild(div);
+                    });
+                    
+                    if (result.numbers.length > 20) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'tracking-item';
+                        moreDiv.style.textAlign = 'center';
+                        moreDiv.style.color = '#666';
+                        moreDiv.innerHTML = `<small>... and ${result.numbers.length - 20} more</small>`;
+                        listContainer.appendChild(moreDiv);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading sent numbers:', error);
+            }
+        }
+
+        async function deleteSentNumbers() {
+            if (!confirm('Are you sure you want to delete all sent numbers? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                deleteSentBtn.disabled = true;
+                deleteSentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                const response = await fetch('/delete_sent_numbers', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', 'All sent numbers deleted successfully');
+                    loadSentNumbers(); // Reload the list
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error deleting sent numbers: ' + error.message);
+            } finally {
+                deleteSentBtn.disabled = false;
+                deleteSentBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            }
+        }
+
+        async function loadInvalidNumbers() {
+            try {
+                const response = await fetch('/get_invalid_numbers');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const listContainer = document.getElementById('invalidNumbersList');
+                    if (result.numbers.length === 0) {
+                        listContainer.innerHTML = '<p class="no-data">No invalid numbers yet</p>';
+                        deleteInvalidBtn.disabled = true;
+                        return;
+                    }
+
+                    deleteInvalidBtn.disabled = false;
+                    listContainer.innerHTML = '';
+                    
+                    // Show total count
+                    const countDiv = document.createElement('div');
+                    countDiv.className = 'tracking-item';
+                    countDiv.style.background = '#fff5f5';
+                    countDiv.style.borderLeft = '3px solid #ff4757';
+                    countDiv.innerHTML = `<strong>Total Invalid Numbers: ${result.numbers.length}</strong>`;
+                    listContainer.appendChild(countDiv);
+                    
+                    // Show recent invalid numbers (last 20)
+                    const recentNumbers = result.numbers.slice(0, 20);
+                    recentNumbers.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'tracking-item no-whatsapp';
+                        div.innerHTML = `
+                            <strong>${item.name}</strong><br>
+                            <small>${item.phone}</small><br>
+                            <small style="color: #666;">${new Date(item.date).toLocaleString()}</small><br>
+                            <small style="color: #ff4757;">${item.reason}</small>
+                        `;
+                        listContainer.appendChild(div);
+                    });
+                    
+                    if (result.numbers.length > 20) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'tracking-item';
+                        moreDiv.style.textAlign = 'center';
+                        moreDiv.style.color = '#666';
+                        moreDiv.innerHTML = `<small>... and ${result.numbers.length - 20} more</small>`;
+                        listContainer.appendChild(moreDiv);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading invalid numbers:', error);
+            }
+        }
+
+        async function deleteInvalidNumbers() {
+            if (!confirm('Are you sure you want to delete all invalid numbers? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                deleteInvalidBtn.disabled = true;
+                deleteInvalidBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                const response = await fetch('/delete_invalid_numbers', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', 'All invalid numbers deleted successfully');
+                    loadInvalidNumbers(); // Reload the list
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Error deleting invalid numbers: ' + error.message);
+            } finally {
+                deleteInvalidBtn.disabled = false;
+                deleteInvalidBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            }
+        }
+
+        // Load sent numbers and invalid numbers on page load
+        loadSentNumbers();
+        loadInvalidNumbers();
+    </script>
+</body>
+</html>

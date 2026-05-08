@@ -1,0 +1,32 @@
+WHATSAPP BULK MESSENGER
+End-User License Agreement
+
+Copyright (c) 2026 MNB EC. All rights reserved.
+
+By installing or using this software you agree to the following terms:
+
+1. GRANT OF LICENSE
+   You are granted a non-exclusive, non-transferable license to install and
+   use this software on computers you own or control.
+
+2. RESTRICTIONS
+   You may not redistribute, sublicense, reverse-engineer, decompile, or
+   disassemble the software except to the extent permitted by applicable law.
+
+3. RESPONSIBLE USE
+   This software automates messaging through WhatsApp Web. You are solely
+   responsible for complying with WhatsApp's Terms of Service, applicable
+   anti-spam laws (including but not limited to the CAN-SPAM Act, GDPR, and
+   your local jurisdiction's regulations), and for obtaining consent from
+   recipients before sending messages.
+
+4. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+5. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+
+If you do not agree to these terms, do not install or use this software.

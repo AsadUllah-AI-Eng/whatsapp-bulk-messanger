@@ -1,0 +1,23 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# PyInstaller build files
+build/
+dist/
+
+# Installer output
+Output/
+
+# App data files
+uploads/
+*.db
+
+# Unnecessary files
+n8n.rar
+icon.ico
+
+# OS files
+.DS_Store
+Thumbs.db

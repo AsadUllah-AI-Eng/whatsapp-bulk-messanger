@@ -322,7 +322,7 @@ def check_whatsapp_exists(phone):
         print(f"Error checking WhatsApp for {phone}: {str(e)}")
         return True  # Assume valid if check fails
 
-def send_message_to_contact(phone, sr_no, message_template, campaign_id):
+def send_message_to_contact(phone, sr_no, message_template, campaign_id, customer_name=""):
     """Send WhatsApp message to a single contact"""
     try:
         if not driver:
@@ -371,8 +371,8 @@ def send_message_to_contact(phone, sr_no, message_template, campaign_id):
             # Continue with sending if validation fails
         
         # Use phone number as name if no name is provided
-        display_name = f"SR#{sr_no}"
-        message = message_template.format(name=display_name)
+        display_name = customer_name if customer_name else f"SR#{sr_no}"
+        message = message_template.replace("{Name}", "{name}").format(name=display_name)
         encoded_message = urllib.parse.quote(message)
         link = f"https://web.whatsapp.com/send?phone={phone}&text={encoded_message}&app_absent=0"
         
@@ -396,8 +396,18 @@ def send_message_to_contact(phone, sr_no, message_template, campaign_id):
             WebDriverWait(driver, 40).until(
                 EC.presence_of_element_located((By.XPATH, "//div[@contenteditable='true'][@data-tab='10']"))
             )
+            time.sleep(2)
             input_box = driver.find_element(By.XPATH, "//div[@contenteditable='true'][@data-tab='10']")
-            input_box.send_keys(Keys.ENTER)
+            try:
+                driver.execute_script("arguments[0].click();", input_box)
+                time.sleep(1)
+                input_box.send_keys(Keys.ENTER)
+            except Exception:
+                try:
+                    send_button = driver.find_element(By.XPATH, "//button[@data-testid='compose-btn-send']")
+                    send_button.click()
+                except Exception:
+                    input_box.send_keys(Keys.ENTER)
         except Exception as e:
             if "invalid session id" in str(e).lower():
                 print(f"[SESSION ERROR] Invalid session during message sending for {phone}")
@@ -542,8 +552,17 @@ def send_messages_thread(excel_file_path, message_template, target_limit, campai
                 sending_status['current_contact'] = f"SR#{sr_no} ({phone})"
                 sending_status['processed_contacts'] = index + 1
                 
+                # Get customer name (case-insensitive)
+                customer_name = ""
+                for col in data.columns:
+                    if col.lower() == 'name':
+                        customer_name = str(row[col]).strip()
+                        if customer_name in ('nan', 'None', ''):
+                            customer_name = ""
+                        break
+
                 print(f"Processing contact {index + 1}: SR#{sr_no} ({phone})")
-                success, message = send_message_to_contact(phone, sr_no, message_template, campaign_id)
+                success, message = send_message_to_contact(phone, sr_no, message_template, campaign_id, customer_name)
                 print(message)
                 time.sleep(message_delay)  # Wait between messages using user-defined delay
                 

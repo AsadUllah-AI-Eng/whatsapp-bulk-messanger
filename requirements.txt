@@ -6,3 +6,4 @@ openpyxl==3.1.2
 Werkzeug==2.3.7
 pywebview==6.2.1
 pythonnet==3.0.5
+waitress==3.0.2

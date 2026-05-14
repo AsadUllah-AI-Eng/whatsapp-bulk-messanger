@@ -20,6 +20,7 @@ block_cipher = None
 hidden = (
     collect_submodules('webdriver_manager')
     + collect_submodules('selenium')
+    + collect_submodules('waitress')
     + ['openpyxl', 'pandas']
 )
 
